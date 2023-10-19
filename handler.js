@@ -1,21 +1,28 @@
-import { GatewayIntentBits } from 'discord-api-types/v10';
-import { Client } from 'discord.js';
-import { BOT_COMMANDS, DISCORD_EVENTS, SOCKET_EVENTS } from './constants.js';
-import shoutOn from './bot-commands/shout-on.js';
-import shoutOff from './bot-commands/shout-off.js';
-import { removeUserSubscription, setUserTalkState } from './state-functions.js';
+import { GatewayIntentBits } from "discord-api-types/v10";
+import { Client } from "discord.js";
+import { BOT_COMMANDS, DISCORD_EVENTS, SOCKET_EVENTS } from "./constants.js";
+import joinBot from "./bot-commands/join-bot.js";
+import getUserId from "./bot-commands/get-user-id.js";
+import { removeBotInUse, setUserTalkState } from "./state-functions.js";
 
 export const getClient = (botId, socket) => {
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildModeration,
+      GatewayIntentBits.GuildWebhooks,
+      GatewayIntentBits.GuildInvites,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.GuildVoiceStates,
       GatewayIntentBits.MessageContent,
-    ],
+      GatewayIntentBits.GuildPresences,
+      GatewayIntentBits.AutoModerationConfiguration,
+      GatewayIntentBits.AutoModerationExecution
+    ]
   });
 
-  client.on(DISCORD_EVENTS.READY, () => {
+  client.on(DISCORD_EVENTS.READY, async () => {
     console.log(`Bot ${botId} started!`);
   });
 
@@ -23,7 +30,7 @@ export const getClient = (botId, socket) => {
     // bot disconnected
     if (oldState.channelId && !newState.channelId) {
       if (newState.id === client.user.id) {
-        removeUserSubscription(client.user.username, socket);
+        removeBotInUse(client.user.username, socket);
       }
     }
   });
@@ -32,25 +39,19 @@ export const getClient = (botId, socket) => {
     if (!message.guild) return;
 
     switch (message.content) {
-      case BOT_COMMANDS.SHOUT_ON: {
-        await shoutOn(botId, message, socket);
+      case BOT_COMMANDS.JOIN_BOT: {
+        await joinBot(botId, message, client, socket);
         break;
       }
-      case BOT_COMMANDS.SHOUT_OFF: {
-        await shoutOff(botId, message, socket);
-        break;
-      }
-      case BOT_COMMANDS.SHOUT_JOIN: {
-        await shoutOn(botId, message, socket, true);
+      case BOT_COMMANDS.MY_ID: {
+        await getUserId(botId, message, socket);
         break;
       }
     }
   });
 
-  socket.on(SOCKET_EVENTS.HANDLE_TALK_BUTTON, ({ botId: bId, state }) => {
-    if (botId === bId) {
-      setUserTalkState(botId, state);
-    }
+  socket.on(SOCKET_EVENTS.HANDLE_TALK_BUTTON, ({ userId, state }) => {
+    setUserTalkState(userId, state);
   });
 
   return client;

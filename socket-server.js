@@ -1,24 +1,27 @@
-import { Server } from 'socket.io';
-import express from 'express';
-import http from 'http';
-import { BOT_NAME, SOCKET_EVENTS } from './constants.js';
+import { Server } from "socket.io";
+import express from "express";
+import http from "http";
+import { SOCKET_EVENTS } from "./constants.js";
 
 const app = express();
 
-let state = {};
+let state = {
+  activeBots: [],
+  usersState: {}
+};
 
-app.get('/state', (req, res) => {
+app.get("/state", (req, res) => {
   res.status(200).send(state);
 });
 
 const server = http.createServer(app);
 const ioServer = new Server(server, {
   cors: {
-    methods: ['GET', 'POST'],
-    transports: ['websocket', 'polling'],
-    credentials: true,
+    methods: ["GET", "POST"],
+    transports: ["websocket", "polling"],
+    credentials: true
   },
-  allowEIO3: true,
+  allowEIO3: true
 });
 
 ioServer.on(SOCKET_EVENTS.CONNECTION, socket => {
@@ -27,29 +30,33 @@ ioServer.on(SOCKET_EVENTS.CONNECTION, socket => {
   });
 
   socket.on(SOCKET_EVENTS.SYNC_BOT_STATE, message => {
-    const { botId, botState, remove } = message;
+    const { botId, remove } = message;
     if (remove) {
-      delete state[botId];
+      const index = state.activeBots.indexOf(botId);
+      if (index >= 0) {
+        state.activeBots.splice(index, 1);
+      }
     } else {
-      state[botId] = botState;
+      state.activeBots.push(botId);
     }
   });
 
-  socket.on(SOCKET_EVENTS.TALK_BUTTON, ({ code, state: talkState, socketId }) => {
-    const botId = Object.keys(state).find(key => state[key]?.code === code);
-
-    if (botId) {
+  socket.on(
+    SOCKET_EVENTS.TALK_BUTTON,
+    ({ userId, state: talkState, socketId }) => {
+      state.usersState[userId] = {
+        ...(state.usersState[userId] || {}),
+        talk: state
+      };
       socket.broadcast.emit(SOCKET_EVENTS.HANDLE_TALK_BUTTON, {
-        botId,
-        state: talkState,
+        userId,
+        state: talkState
       });
       socket.emit(SOCKET_EVENTS.APP_CONNECTED, { success: true, socketId });
-    } else {
-      socket.emit(SOCKET_EVENTS.APP_CONNECTED, { success: false, socketId });
     }
-  });
+  );
 });
 
 server.listen(3111, () => {
-  console.log('listening on *:3111');
+  console.log("listening on *:3111");
 });
