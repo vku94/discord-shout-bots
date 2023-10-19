@@ -1,0 +1,35 @@
+{
+  "name": "discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"node socket-server.js\" \"node index.js 1\" \"node index.js 2\" \"node index.js 3\" \"node index.js 4\" \"node index.js 5\" \"node index.js 6\" \"node index.js 7\" \"node index.js 8\" \"node index.js 9\" \"node index.js 10\" \"node index.js 11\" \"node index.js 12\" \"node index.js 13\" \"node index.js 14\"",
+    "start:single": "node index.js 1",
+    "start:server": "node socket-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "dev",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.16.0",
+    "axios": "^1.5.1",
+    "bufferutil": "^4.0.7",
+    "concurrently": "^8.2.1",
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "install": "^0.13.0",
+    "libsodium-wrappers": "^0.7.13",
+    "npm": "^10.2.0",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "utf-8-validate": "^6.0.3",
+    "zlib-sync": "^0.1.8"
+  },
+  "devDependencies": {
+    "prettier": "^1.18.2"
+  }
+}
