@@ -74,9 +74,62 @@ const botsList = [
     name: `${BOT_NAME} 14`,
     token: process.env.CLIENT_TOKEN14
     // https://discord.com/api/oauth2/authorize?client_id=1163087697372532776&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 15`,
+    token: process.env.CLIENT_TOKEN15
+    // https://discord.com/api/oauth2/authorize?client_id=1163167223779696740&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 16`,
+    token: process.env.CLIENT_TOKEN16
+    // https://discord.com/api/oauth2/authorize?client_id=1163167264841941254&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 17`,
+    token: process.env.CLIENT_TOKEN17
+    // https://discord.com/api/oauth2/authorize?client_id=1163167314104045668&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 18`,
+    token: process.env.CLIENT_TOKEN18
+    // https://discord.com/api/oauth2/authorize?client_id=1163167370978803765&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 19`,
+    token: process.env.CLIENT_TOKEN19
+    // https://discord.com/api/oauth2/authorize?client_id=1163167411554500671&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 20`,
+    token: process.env.CLIENT_TOKEN20
+    // https://discord.com/api/oauth2/authorize?client_id=1163167454319628318&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 21`,
+    token: process.env.CLIENT_TOKEN21
+    // https://discord.com/api/oauth2/authorize?client_id=1163167498439499918&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 22`,
+    token: process.env.CLIENT_TOKEN22
+    // https://discord.com/api/oauth2/authorize?client_id=1163167537702371441&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 23`,
+    token: process.env.CLIENT_TOKEN23
+    // https://discord.com/api/oauth2/authorize?client_id=1163167574167670814&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 24`,
+    token: process.env.CLIENT_TOKEN24
+    // https://discord.com/api/oauth2/authorize?client_id=1163167617209606205&permissions=8&scope=bot
+  },
+  {
+    name: `${BOT_NAME} 25`,
+    token: process.env.CLIENT_TOKEN25
+    // https://discord.com/api/oauth2/authorize?client_id=1163183312014155907&permissions=8&scope=bot
   }
 ];
 
-await spawnClient(
-  botsList.find(f => f.name === `${BOT_NAME} ${process.argv[2]}`)
-);
+spawnClient(botsList.find(f => f.name === `${BOT_NAME} ${process.argv[2]}`));

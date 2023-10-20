@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"node socket-server.js\" \"node index.js 1\" \"node index.js 2\" \"node index.js 3\" \"node index.js 4\" \"node index.js 5\" \"node index.js 6\" \"node index.js 7\" \"node index.js 8\" \"node index.js 9\" \"node index.js 10\" \"node index.js 11\" \"node index.js 12\" \"node index.js 13\" \"node index.js 14\"",
+    "start": "concurrently \"node socket-server.js\" \"node index.js 1\" \"node index.js 2\" \"node index.js 3\" \"node index.js 4\" \"node index.js 5\" \"node index.js 6\" \"node index.js 7\" \"node index.js 8\" \"node index.js 9\" \"node index.js 10\" \"node index.js 11\" \"node index.js 12\" \"node index.js 13\" \"node index.js 14\" \"node index.js 15\" \"node index.js 16\" \"node index.js 17\" \"node index.js 18\" \"node index.js 19\" \"node index.js 20\" \"node index.js 21\" \"node index.js 22\" \"node index.js 23\" \"node index.js 24\" \"node index.js 25\"",
     "start:single": "node index.js 1",
     "start:server": "node socket-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
