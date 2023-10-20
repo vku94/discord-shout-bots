@@ -77,5 +77,6 @@ const botsList = [
   }
 ];
 
-// todo: sync state between processes. Send updated node to server and trigger sync as broadcast
-spawnClient(botsList.find(f => f.name === `${BOT_NAME} ${process.argv[2]}`));
+await spawnClient(
+  botsList.find(f => f.name === `${BOT_NAME} ${process.argv[2]}`)
+);
