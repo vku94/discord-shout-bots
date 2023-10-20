@@ -3,11 +3,7 @@ import { Client } from "discord.js";
 import { BOT_COMMANDS, DISCORD_EVENTS, SOCKET_EVENTS } from "./constants.js";
 import joinBot from "./bot-commands/join-bot.js";
 import getUserId from "./bot-commands/get-user-id.js";
-import {
-  connectToChannel,
-  removeBotInUse,
-  setUserTalkState
-} from "./state-functions.js";
+import { removeBotInUse, setUserTalkState } from "./state-functions.js";
 
 export const getClient = (botId, socket) => {
   const client = new Client({
@@ -26,7 +22,7 @@ export const getClient = (botId, socket) => {
     ]
   });
 
-  client.on(DISCORD_EVENTS.READY, async () => {
+  async function botJoin() {
     const guild = await client.guilds.fetch(process.env.SERVER_ID);
     const channels = await guild.channels.fetch();
     const voiceChannels = channels.filter(f => f.bitrate);
@@ -38,15 +34,19 @@ export const getClient = (botId, socket) => {
       }
       index += 1;
     }
+  }
 
+  client.on(DISCORD_EVENTS.READY, async () => {
+    await botJoin();
     console.log(`Bot ${botId} started!`);
   });
 
-  client.on(DISCORD_EVENTS.VOICE_STATE_UPDATE, (oldState, newState) => {
+  client.on(DISCORD_EVENTS.VOICE_STATE_UPDATE, async (oldState, newState) => {
     // bot disconnected
     if (oldState.channelId && !newState.channelId) {
       if (newState.id === client.user.id) {
         removeBotInUse(botId, socket);
+        await botJoin();
       }
     }
   });

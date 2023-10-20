@@ -95,6 +95,7 @@ export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
   if (connection) {
     const guild = await client.guilds.fetch(process.env.SERVER_ID);
     const members = await guild.members.fetch();
+    // possibly check discord role
     const users = members.map(r => r.user).filter(u => u.bot === false);
 
     const receiverUserIdMap = users.map(user => ({
