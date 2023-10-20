@@ -11,7 +11,7 @@ import {
 } from "../state-functions.js";
 import { BOT_NAME } from "../constants.js";
 
-export default async function(botId, message, client, socket) {
+export default async function(botId, voiceChannel, client, socket) {
   await syncState(botId);
 
   if (checkIfBotIsInUse(botId)) {
@@ -21,13 +21,11 @@ export default async function(botId, message, client, socket) {
   setBotInUse(botId, socket);
 
   try {
-    const voiceChannel = message.member?.voice.channel;
-
     if (voiceChannel) {
       if (
         voiceChannel.members
-          .map(m => m.user.username)
-          .some(name => name.includes(BOT_NAME))
+          ?.map?.(m => m.user.username)
+          ?.some?.(name => name.includes(BOT_NAME))
       ) {
         removeBotInUse(botId, socket);
         return;
@@ -35,7 +33,12 @@ export default async function(botId, message, client, socket) {
 
       await destroyConnection(voiceChannel.guild.id);
       await connectToChannel(voiceChannel);
-      await attachVoiceTrafficProxy(botId, message, client, socket);
+      await attachVoiceTrafficProxy(
+        botId,
+        voiceChannel.guild.id,
+        client,
+        socket
+      );
 
       // Disconnect bot on process exit
       ["SIGTERM", "SIGINT"].forEach(event => {

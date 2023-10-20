@@ -22,7 +22,7 @@ export const DISCORD_EVENTS = {
 
 export const BOT_COMMANDS = {
   MY_ID: "!myid",
-  JOIN_BOT: "!q"
+  JOIN_BOT: "!attach"
 };
 
 export const BOT_NAME = "Shout Bot";

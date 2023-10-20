@@ -89,8 +89,8 @@ export async function destroyConnection(guildId) {
 
 let buffer;
 
-export async function attachVoiceTrafficProxy(botId, message, client, socket) {
-  const connection = getVoiceConnection(message.guild.id);
+export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
+  const connection = getVoiceConnection(guildId);
 
   if (connection) {
     const guild = await client.guilds.fetch(process.env.SERVER_ID);
