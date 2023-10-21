@@ -132,4 +132,6 @@ const botsList = [
   }
 ];
 
-spawnClient(botsList.find(f => f.name === `${BOT_NAME} ${process.argv[2]}`));
+await spawnClient(
+  botsList.find(f => f.name === `${BOT_NAME} ${process.argv[2]}`)
+);
