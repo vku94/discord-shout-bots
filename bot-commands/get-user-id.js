@@ -1,4 +1,3 @@
-import { syncState } from "../state-functions.js";
 import {
   checkIfBotIsInUse,
   setBotInUse,
@@ -7,7 +6,10 @@ import {
 } from "../state-functions.js";
 
 export default async function(botId, message, socket) {
-  await syncState(botId);
+  const botNumber = parseInt(botId.split(" ").pop()) || 0;
+  if (botNumber !== 25) {
+    return;
+  }
 
   if (checkIfBotIsInUse(botId) || checkIfBotShouldSleep(botId)) {
     return;
