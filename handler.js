@@ -5,6 +5,18 @@ import joinBot from "./bot-commands/join-bot.js";
 import getUserId from "./bot-commands/get-user-id.js";
 import { removeBotInUse, setUserTalkState } from "./state-functions.js";
 
+const channelsToAvoid = [
+  "сію тобі в очі",
+  "Cпєціальная ваєнная апєрація",
+  "Cпілі полуниці",
+  "we🔸need🔸u",
+  "🔇Cвіт без русні(𝐚𝐟𝐤)",
+  "🔇𝐚𝐟𝐤",
+  "IT TAKES TWO",
+  "___________________________",
+  "🔈𝐕𝐎𝐈𝐂𝐄"
+];
+
 export const getClient = (botId, socket) => {
   const client = new Client({
     intents: [
@@ -25,7 +37,12 @@ export const getClient = (botId, socket) => {
   async function botJoin() {
     const guild = await client.guilds.fetch(process.env.SERVER_ID);
     const channels = await guild.channels.fetch();
-    const voiceChannels = channels.filter(f => f.bitrate);
+    const voiceChannels = channels
+      .filter(f => f.bitrate)
+      .filter(f => !channelsToAvoid.includes(f.name))
+      .filter(f => !f.name.toLowerCase().includes("afk"))
+      .filter(f => !f.name.toLowerCase().includes("shout-skip"));
+
     let index = 0;
     for (const [, channel] of voiceChannels) {
       const botNumber = parseInt(botId.split(" ").pop());
