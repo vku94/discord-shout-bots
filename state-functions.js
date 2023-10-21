@@ -31,15 +31,15 @@ export function checkIfBotShouldSleep(botId) {
   return state.activeBots.length + 1 >= botNumber;
 }
 
-export function setUserTalkState(userId, state) {
+export function setUserTalkState(userId, talkState) {
   state.usersState[userId] = {
-    ...(state.usersState[userId] || {}),
-    talk: state
+    ...(state.usersState?.[userId] || {}),
+    talk: talkState
   };
 }
 
 export function getUserTalkState(userId) {
-  return state.usersState[userId]?.talk;
+  return state.usersState?.[userId]?.talk;
 }
 
 // Remote functions

@@ -14,6 +14,10 @@ app.get("/state", (req, res) => {
   res.status(200).send(state);
 });
 
+app.get("/health-check", (req, res) => {
+  res.status(200).send({ health: true, timestamp: +new Date() });
+});
+
 const server = http.createServer(app);
 const ioServer = new Server(server, {
   cors: {
@@ -45,8 +49,8 @@ ioServer.on(SOCKET_EVENTS.CONNECTION, socket => {
     SOCKET_EVENTS.TALK_BUTTON,
     ({ userId, state: talkState, socketId }) => {
       state.usersState[userId] = {
-        ...(state.usersState[userId] || {}),
-        talk: state
+        ...(state.usersState?.[userId] || {}),
+        talk: talkState
       };
       socket.broadcast.emit(SOCKET_EVENTS.HANDLE_TALK_BUTTON, {
         userId,
