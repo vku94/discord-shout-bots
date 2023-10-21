@@ -66,9 +66,12 @@ export const getClient = (botId, socket) => {
     }
   });
 
-  socket.on(SOCKET_EVENTS.HANDLE_TALK_BUTTON, ({ userId, state }) => {
-    setUserTalkState(userId, state);
-  });
+  socket.on(
+    SOCKET_EVENTS.HANDLE_TALK_BUTTON,
+    ({ userId, state, targetBots }) => {
+      setUserTalkState(userId, state, targetBots);
+    }
+  );
 
   return client;
 };

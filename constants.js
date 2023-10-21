@@ -5,7 +5,10 @@ export const SOCKET_EVENTS = {
   TALK_BUTTON: "talkButton",
   HANDLE_TALK_BUTTON: "handleTalkButton",
   APP_CONNECTED: "appConnected",
-  SYNC_BOT_STATE: "botState"
+  SYNC_BOT_STATE: "botState",
+  SYNC_BOT_CHANNEL_MAP: "botChannelMap",
+  FETCH_BOT_CHANNEL_MAP: "fetchBotChannelMap",
+  SEND_BOT_CHANNEL_MAP: "sendBotChannelMap"
 };
 
 export const STREAM_EVENTS = {

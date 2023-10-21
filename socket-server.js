@@ -7,11 +7,15 @@ const app = express();
 
 let state = {
   activeBots: [],
-  usersState: {}
+  usersState: {},
+  botChannelMap: {}
 };
 
 app.get("/state", (req, res) => {
-  res.status(200).send(state);
+  res.status(200).send({
+    activeBots: state.activeBots,
+    usersState: state.usersState
+  });
 });
 
 app.get("/health-check", (req, res) => {
@@ -45,16 +49,40 @@ ioServer.on(SOCKET_EVENTS.CONNECTION, socket => {
     }
   });
 
+  socket.on(SOCKET_EVENTS.SYNC_BOT_CHANNEL_MAP, message => {
+    const { botId, channelName, remove } = message;
+    if (remove) {
+      delete state.botChannelMap[botId];
+    } else {
+      state.botChannelMap[botId] = channelName;
+    }
+  });
+
+  socket.on(SOCKET_EVENTS.FETCH_BOT_CHANNEL_MAP, ({ socketId }) => {
+    socket.emit(SOCKET_EVENTS.SEND_BOT_CHANNEL_MAP, {
+      array: Object.keys(state.botChannelMap).map(k => {
+        const botNumber = parseInt(k.split(" ").pop()) || 0;
+        return {
+          botNumber,
+          channelName: state.botChannelMap?.[k]
+        };
+      }),
+      socketId
+    });
+  });
+
   socket.on(
     SOCKET_EVENTS.TALK_BUTTON,
-    ({ userId, state: talkState, socketId }) => {
+    ({ userId, state: talkState, socketId, targetBots }) => {
       state.usersState[userId] = {
         ...(state.usersState?.[userId] || {}),
-        talk: talkState
+        talk: talkState,
+        targetBots
       };
       socket.broadcast.emit(SOCKET_EVENTS.HANDLE_TALK_BUTTON, {
         userId,
-        state: talkState
+        state: talkState,
+        targetBots
       });
       socket.emit(SOCKET_EVENTS.APP_CONNECTED, { success: true, socketId });
     }

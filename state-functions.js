@@ -31,15 +31,19 @@ export function checkIfBotShouldSleep(botId) {
   return state.activeBots.length + 1 >= botNumber;
 }
 
-export function setUserTalkState(userId, talkState) {
+export function setUserTalkState(userId, talkState, targetBots) {
   state.usersState[userId] = {
     ...(state.usersState?.[userId] || {}),
-    talk: talkState
+    talk: talkState,
+    targetBots
   };
 }
 
 export function getUserTalkState(userId) {
-  return state.usersState?.[userId]?.talk;
+  return {
+    talk: state.usersState?.[userId]?.talk,
+    targetBots: state.usersState?.[userId]?.targetBots
+  };
 }
 
 // Remote functions
@@ -55,6 +59,20 @@ export function setBotInUse(botId, socket) {
   state.activeBots.push(botId);
   socket.emit(SOCKET_EVENTS.SYNC_BOT_STATE, {
     botId
+  });
+}
+
+export function setBotChannelNameMap(botId, channelName, socket) {
+  socket.emit(SOCKET_EVENTS.SYNC_BOT_CHANNEL_MAP, {
+    botId,
+    channelName
+  });
+}
+
+export function removeBotChannelNameMap(botId, socket) {
+  socket.emit(SOCKET_EVENTS.SYNC_BOT_CHANNEL_MAP, {
+    botId,
+    remove: true
   });
 }
 
@@ -87,8 +105,6 @@ export async function destroyConnection(guildId) {
   }
 }
 
-let buffer;
-
 export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
   const connection = getVoiceConnection(guildId);
 
@@ -112,18 +128,20 @@ export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
     if (socket) {
       receiverUserIdMap.forEach(({ receiver, userId }) =>
         receiver.on(STREAM_EVENTS.DATA, chunk => {
-          if (
-            process.env.PUSH_TO_TALK_ENABLED === "true"
-              ? getUserTalkState(userId)
-              : true
-          ) {
-            socket.emit(SOCKET_EVENTS.SPEAKING_CHUNK, chunk);
+          const { talk, targetBots } = getUserTalkState(userId);
+          if (process.env.PUSH_TO_TALK_ENABLED === "true" ? talk : true) {
+            socket.emit(SOCKET_EVENTS.SPEAKING_CHUNK, {
+              stream: chunk,
+              targetBots
+            });
           }
         })
       );
 
-      socket.on(SOCKET_EVENTS.PLAYING_CHUNK, message => {
-        connection.playOpusPacket(message);
+      socket.on(SOCKET_EVENTS.PLAYING_CHUNK, ({ stream, targetBots }) => {
+        const botNumber = parseInt(botId.split(" ").pop()) || 0;
+        if (!targetBots || targetBots?.includes(botNumber))
+          connection.playOpusPacket(stream);
       });
     }
   }
