@@ -106,30 +106,15 @@ export async function destroyConnection(guildId) {
 
 var buffer = {};
 
-function mergeAudio(buffers, overlap = 0) {
+function mergeAudio(buffers) {
   if (buffers.length === 1) {
     return buffers[0];
   }
+  // Calculate the total length of the combined buffer
+  const totalLength = buffers.reduce((acc, buffer) => acc + buffer.length, 0);
 
-  const [firstBuffer, ...remainingBuffers] = buffers;
-  const mergedBuffer = firstBuffer.clone();
-
-  for (let i = 0; i < remainingBuffers.length; i++) {
-    const currentBuffer = remainingBuffers[i];
-    const overlapLength = Math.min(overlap, currentBuffer.length);
-    const overlapStart = currentBuffer.length - overlapLength;
-
-    for (let j = 0; j < overlapLength; j++) {
-      const factor = j / overlapLength; // Adjust this factor for different overlap effects
-      mergedBuffer.getChannelData(0)[overlapStart + j] +=
-        currentBuffer.getChannelData(0)[j] * (1 - factor);
-    }
-
-    const nonOverlapData = currentBuffer.getChannelData(0).slice(overlapLength);
-    mergedBuffer.copyToChannel(nonOverlapData, 0, mergedBuffer.length);
-  }
-
-  return mergedBuffer;
+  // Create a new buffer to hold the combined audio data
+  return Buffer.concat(buffers, totalLength);
 }
 
 export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
@@ -184,10 +169,11 @@ export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
         if (Object.keys(buffer).length) {
           const buffers = Object.keys(buffer).map(k => buffer[k]);
           const resultBuffer = mergeAudio(buffers);
-          connection.playOpusPacket(resultBuffer);
+          connection.prepareAudioPacket(resultBuffer);
+          connection.dispatchAudio();
           buffer = {};
         }
-      }, 0);
+      }, 20);
     }
   }
 }
