@@ -6,7 +6,6 @@ import {
   getVoiceConnection
 } from "@discordjs/voice";
 import { SOCKET_EVENTS, STREAM_EVENTS } from "./constants.js";
-import { checkPermission } from "./permissions.js";
 
 let state = {
   activeBots: [],
@@ -105,6 +104,34 @@ export async function destroyConnection(guildId) {
   }
 }
 
+var buffer = {};
+
+function mergeAudio(buffers, overlap = 0) {
+  if (buffers.length === 1) {
+    return buffers[0];
+  }
+
+  const [firstBuffer, ...remainingBuffers] = buffers;
+  const mergedBuffer = firstBuffer.clone();
+
+  for (let i = 0; i < remainingBuffers.length; i++) {
+    const currentBuffer = remainingBuffers[i];
+    const overlapLength = Math.min(overlap, currentBuffer.length);
+    const overlapStart = currentBuffer.length - overlapLength;
+
+    for (let j = 0; j < overlapLength; j++) {
+      const factor = j / overlapLength; // Adjust this factor for different overlap effects
+      mergedBuffer.getChannelData(0)[overlapStart + j] +=
+        currentBuffer.getChannelData(0)[j] * (1 - factor);
+    }
+
+    const nonOverlapData = currentBuffer.getChannelData(0).slice(overlapLength);
+    mergedBuffer.copyToChannel(nonOverlapData, 0, mergedBuffer.length);
+  }
+
+  return mergedBuffer;
+}
+
 export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
   const connection = getVoiceConnection(guildId);
 
@@ -132,17 +159,35 @@ export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
           if (process.env.PUSH_TO_TALK_ENABLED === "true" ? talk : true) {
             socket.emit(SOCKET_EVENTS.SPEAKING_CHUNK, {
               stream: chunk,
-              targetBots
+              targetBots,
+              userId
             });
           }
         })
       );
 
-      socket.on(SOCKET_EVENTS.PLAYING_CHUNK, ({ stream, targetBots }) => {
-        const botNumber = parseInt(botId.split(" ").pop()) || 0;
-        if (!targetBots || targetBots?.includes(botNumber))
-          connection.playOpusPacket(stream);
-      });
+      socket.on(
+        SOCKET_EVENTS.PLAYING_CHUNK,
+        ({ stream, targetBots, userId }) => {
+          const botNumber = parseInt(botId.split(" ").pop()) || 0;
+          if (!targetBots || targetBots?.includes(botNumber)) {
+            const bufferLength = (buffer[userId]?.length || 0) + stream.length;
+            const buffArray = buffer[userId]
+              ? [buffer[userId], stream]
+              : [stream];
+            buffer[userId] = Buffer.concat(buffArray, bufferLength);
+          }
+        }
+      );
+
+      setInterval(() => {
+        if (Object.keys(buffer).length) {
+          const buffers = Object.keys(buffer).map(k => buffer[k]);
+          const resultBuffer = mergeAudio(buffers);
+          connection.playOpusPacket(resultBuffer);
+          buffer = {};
+        }
+      }, 0);
     }
   }
 }
