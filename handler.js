@@ -14,7 +14,16 @@ const channelsToAvoid = [
   "🔇𝐚𝐟𝐤",
   "IT TAKES TWO",
   "___________________________",
-  "🔈𝐕𝐎𝐈𝐂𝐄"
+  "🔈𝐕𝐎𝐈𝐂𝐄",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9"
 ];
 
 export const getClient = (botId, socket) => {
@@ -46,7 +55,7 @@ export const getClient = (botId, socket) => {
     let index = 0;
     for (const [, channel] of voiceChannels) {
       const botNumber = parseInt(botId.split(" ").pop());
-      if (botNumber === index + 1) {
+      if (botNumber === index + 1 && botNumber !== 25) {
         await joinBot(botId, channel, client, socket);
       }
       index += 1;
