@@ -156,16 +156,18 @@ export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
         ({ stream, targetBots, userId }) => {
           const botNumber = parseInt(botId.split(" ").pop()) || 0;
           if (!targetBots || targetBots?.includes(botNumber)) {
-            const bufferLength = (buffer[userId]?.length || 0) + stream.length;
+            connection.playOpusPacket(stream);
+
+            /* const bufferLength = (buffer[userId]?.length || 0) + stream.length;
             const buffArray = buffer[userId]
               ? [buffer[userId], stream]
               : [stream];
-            buffer[userId] = Buffer.concat(buffArray, bufferLength);
+            buffer[userId] = Buffer.concat(buffArray, bufferLength);*/
           }
         }
       );
 
-      setInterval(() => {
+      /*setInterval(() => {
         if (Object.keys(buffer).length) {
           const buffers = Object.keys(buffer).map(k => buffer[k]);
           const resultBuffer = mergeAudio(buffers);
@@ -173,7 +175,7 @@ export async function attachVoiceTrafficProxy(botId, guildId, client, socket) {
           connection.dispatchAudio();
           buffer = {};
         }
-      }, 20);
+      }, 20);*/
     }
   }
 }
